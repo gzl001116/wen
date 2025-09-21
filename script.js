@@ -6,11 +6,12 @@ const videoFiles = [
     { name: "示例视频 4", url: "videos/sample4.mp4" }
 ];
 
+// VAST广告URL（写死在代码中）
+const VAST_AD_URL = "https://example.com/vast.xml"; // 在这里设置默认的VAST广告URL
+
 // DOM元素
 const videoPlayer = document.getElementById('videoPlayer');
 const videoList = document.getElementById('videoList');
-const vastUrlInput = document.getElementById('vastUrl');
-const loadVastButton = document.getElementById('loadVast');
 
 // VAST Client
 const VASTClient = window.VAST.VASTClient;
@@ -22,12 +23,14 @@ document.addEventListener('DOMContentLoaded', function() {
     loadVideoList();
     // 如果有视频文件，自动加载第一个
     if (videoFiles.length > 0) {
-        playVideo(videoFiles[0].url);
+        // 如果设置了VAST广告URL，则先播放广告
+        if (VAST_AD_URL) {
+            loadVastAd(VAST_AD_URL, videoFiles[0].url);
+        } else {
+            playVideo(videoFiles[0].url);
+        }
         setActiveVideo(0);
     }
-    
-    // 添加VAST广告加载事件
-    loadVastButton.addEventListener('click', loadVastAd);
 });
 
 // 加载视频列表
@@ -38,7 +41,12 @@ function loadVideoList() {
         const listItem = document.createElement('li');
         listItem.textContent = video.name;
         listItem.addEventListener('click', () => {
-            playVideo(video.url);
+            // 如果设置了VAST广告URL，则先播放广告
+            if (VAST_AD_URL) {
+                loadVastAd(VAST_AD_URL, video.url);
+            } else {
+                playVideo(video.url);
+            }
             setActiveVideo(index);
         });
         videoList.appendChild(listItem);
@@ -72,14 +80,7 @@ function setActiveVideo(index) {
 }
 
 // 加载并播放VAST广告
-function loadVastAd() {
-    const vastUrl = vastUrlInput.value.trim();
-    
-    if (!vastUrl) {
-        alert('请输入有效的VAST URL');
-        return;
-    }
-    
+function loadVastAd(vastUrl, nextVideoUrl) {
     // 创建VAST客户端
     const client = new VASTClient();
     
@@ -88,7 +89,8 @@ function loadVastAd() {
         .then(res => {
             // 检查是否有广告
             if (res.ads.length === 0) {
-                alert('未找到广告');
+                console.log('未找到广告，直接播放视频');
+                playVideo(nextVideoUrl);
                 return;
             }
             
@@ -97,7 +99,8 @@ function loadVastAd() {
             
             // 检查是否有线性广告
             if (!ad || !ad.creatives || ad.creatives.length === 0) {
-                alert('广告格式不正确');
+                console.log('广告格式不正确，直接播放视频');
+                playVideo(nextVideoUrl);
                 return;
             }
             
@@ -105,7 +108,8 @@ function loadVastAd() {
             const linearCreative = ad.creatives.find(creative => creative.type === 'linear');
             
             if (!linearCreative || !linearCreative.mediaFiles || linearCreative.mediaFiles.length === 0) {
-                alert('未找到支持的媒体文件');
+                console.log('未找到支持的媒体文件，直接播放视频');
+                playVideo(nextVideoUrl);
                 return;
             }
             
@@ -114,21 +118,23 @@ function loadVastAd() {
                 file.mimeType === 'video/mp4') || linearCreative.mediaFiles[0];
             
             if (!mediaFile || !mediaFile.fileURL) {
-                alert('媒体文件URL无效');
+                console.log('媒体文件URL无效，直接播放视频');
+                playVideo(nextVideoUrl);
                 return;
             }
             
-            // 播放广告
-            playAd(mediaFile.fileURL, ad, linearCreative);
+            // 播放广告，广告播放完成后播放原视频
+            playAd(mediaFile.fileURL, ad, linearCreative, nextVideoUrl);
         })
         .catch(err => {
             console.error('VAST解析错误:', err);
-            alert('VAST广告加载失败: ' + err.message);
+            // 出错时直接播放原视频
+            playVideo(nextVideoUrl);
         });
 }
 
 // 播放广告
-function playAd(adUrl, ad, creative) {
+function playAd(adUrl, ad, creative, nextVideoUrl) {
     // 暂停当前视频
     videoPlayer.pause();
     
@@ -163,7 +169,9 @@ function playAd(adUrl, ad, creative) {
     // 监听播放完成事件
     videoPlayer.onended = () => {
         tracker.track('complete');
-        console.log('广告播放完成');
+        console.log('广告播放完成，开始播放原视频');
+        // 广告播放完成后播放原视频
+        playVideo(nextVideoUrl);
     };
     
     // 开始播放广告
@@ -173,7 +181,8 @@ function playAd(adUrl, ad, creative) {
         })
         .catch(error => {
             console.error('广告播放出错:', error);
-            alert('广告播放失败: ' + error.message);
+            // 出错时直接播放原视频
+            playVideo(nextVideoUrl);
         });
 }
 
