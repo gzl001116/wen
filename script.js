@@ -11,8 +11,10 @@ let videoFiles = [
 // VAST广告URL（写死在代码中）
 const VAST_AD_URL = ""; // 在这里设置默认的VAST广告URL
 
+// Video.js 播放器实例
+let player;
+
 // DOM元素
-const videoPlayer = document.getElementById('videoPlayer');
 const videoList = document.getElementById('videoList');
 const videoUrlInput = document.getElementById('videoUrl');
 const addVideoButton = document.getElementById('addVideo');
@@ -24,6 +26,42 @@ const VASTTracker = window.VAST.VASTTracker;
 
 // 初始化
 document.addEventListener('DOMContentLoaded', function() {
+    // 初始化Video.js播放器
+    player = videojs('videoPlayer', {
+        controls: true,
+        preload: 'auto',
+        fluid: true,
+        playbackRates: [0.5, 1, 1.5, 2]
+    });
+    
+    // 监听播放器错误事件
+    player.on('error', function() {
+        const error = player.error();
+        console.error('视频播放错误:', error);
+        
+        // 显示友好的错误信息
+        let errorMsg = '视频播放出错: ';
+        switch (error.code) {
+            case 1:
+                errorMsg += '用户中止了视频播放。';
+                break;
+            case 2:
+                errorMsg += '网络错误导致视频下载中断。';
+                break;
+            case 3:
+                errorMsg += '视频解码错误。';
+                break;
+            case 4:
+                errorMsg += '视频格式不支持或URL无效。';
+                break;
+            default:
+                errorMsg += '未知错误。';
+                break;
+        }
+        
+        alert(errorMsg + '\n\n提示：如果您尝试播放在线视频，请确保使用本地服务器运行此应用。');
+    });
+    
     loadVideoList();
     // 尝试动态加载videos文件夹中的视频文件
     loadVideosFromFolder();
@@ -36,33 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (event.key === 'Enter') {
             addVideoFromUrl();
         }
-    });
-    
-    // 监听视频播放错误
-    videoPlayer.addEventListener('error', function(e) {
-        const error = videoPlayer.error;
-        let errorMsg = '视频播放出错: ';
-        
-        switch (error.code) {
-            case error.MEDIA_ERR_ABORTED:
-                errorMsg += '您中止了视频播放。';
-                break;
-            case error.MEDIA_ERR_NETWORK:
-                errorMsg += '网络错误导致视频下载中断。';
-                break;
-            case error.MEDIA_ERR_DECODE:
-                errorMsg += '视频解码错误。';
-                break;
-            case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                errorMsg += '视频格式不支持或URL无效。';
-                break;
-            default:
-                errorMsg += '未知错误。';
-                break;
-        }
-        
-        console.error('视频播放错误:', errorMsg);
-        alert(errorMsg + '\n\n提示：如果您尝试播放在线视频，请确保使用本地服务器运行此应用，而不是直接打开HTML文件。');
     });
 });
 
@@ -161,17 +172,32 @@ function loadVideoList() {
 
 // 播放视频
 function playVideo(url) {
-    videoPlayer.src = url;
-    videoPlayer.load();
-    videoPlayer.play()
-        .then(() => {
-            console.log('视频开始播放');
-        })
-        .catch(error => {
-            console.error('视频播放出错:', error);
-            alert('无法播放视频，请检查文件路径或格式: ' + error.message + 
-                  '\n\n提示：如果您尝试播放在线视频，请确保使用本地服务器运行此应用，而不是直接打开HTML文件。');
+    try {
+        player.src({
+            src: url,
+            type: getVideoType(url)
         });
+        
+        player.play()
+            .then(() => {
+                console.log('视频开始播放');
+            })
+            .catch(error => {
+                console.error('视频播放出错:', error);
+                alert('无法播放视频，请检查文件路径或格式: ' + error.message);
+            });
+    } catch (error) {
+        console.error('设置视频源时出错:', error);
+        alert('设置视频源时出错: ' + error.message);
+    }
+}
+
+// 根据URL获取视频类型
+function getVideoType(url) {
+    if (url.includes('.mp4')) return 'video/mp4';
+    if (url.includes('.webm')) return 'video/webm';
+    if (url.includes('.ogg')) return 'video/ogg';
+    return 'video/mp4'; // 默认类型
 }
 
 // 设置当前活动视频的样式
@@ -243,11 +269,13 @@ function loadVastAd(vastUrl, nextVideoUrl) {
 // 播放广告
 function playAd(adUrl, ad, creative, nextVideoUrl) {
     // 暂停当前视频
-    videoPlayer.pause();
+    player.pause();
     
     // 设置广告URL
-    videoPlayer.src = adUrl;
-    videoPlayer.load();
+    player.src({
+        src: adUrl,
+        type: getVideoType(adUrl)
+    });
     
     // 创建追踪器
     const tracker = new VASTTracker(null, ad, creative);
@@ -256,13 +284,13 @@ function playAd(adUrl, ad, creative, nextVideoUrl) {
     tracker.trackImpression();
     
     // 监听播放事件
-    videoPlayer.onplay = () => {
+    player.on('play', () => {
         tracker.track('start');
-    };
+    });
     
     // 监听播放进度事件
-    videoPlayer.ontimeupdate = () => {
-        const percent = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+    player.on('timeupdate', () => {
+        const percent = (player.currentTime() / player.duration()) * 100;
         
         if (percent >= 25 && percent < 50) {
             tracker.track('firstQuartile');
@@ -271,18 +299,18 @@ function playAd(adUrl, ad, creative, nextVideoUrl) {
         } else if (percent >= 75) {
             tracker.track('thirdQuartile');
         }
-    };
+    });
     
     // 监听播放完成事件
-    videoPlayer.onended = () => {
+    player.on('ended', () => {
         tracker.track('complete');
         console.log('广告播放完成，开始播放原视频');
         // 广告播放完成后播放原视频
         playVideo(nextVideoUrl);
-    };
+    });
     
     // 开始播放广告
-    videoPlayer.play()
+    player.play()
         .then(() => {
             console.log('广告开始播放');
         })
@@ -298,19 +326,19 @@ document.addEventListener('keydown', function(event) {
     // 空格键控制播放/暂停
     if (event.code === 'Space') {
         event.preventDefault();
-        if (videoPlayer.paused) {
-            videoPlayer.play();
+        if (player.paused()) {
+            player.play();
         } else {
-            videoPlayer.pause();
+            player.pause();
         }
     }
     
     // 左右箭头键控制快进快退
     if (event.code === 'ArrowRight') {
-        videoPlayer.currentTime += 5;
+        player.currentTime(player.currentTime() + 5);
     }
     
     if (event.code === 'ArrowLeft') {
-        videoPlayer.currentTime -= 5;
+        player.currentTime(player.currentTime() - 5);
     }
 });

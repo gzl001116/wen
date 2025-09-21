@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>测试在线视频播放</title>
+    <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,7 +14,7 @@
             margin: 20px 0;
             text-align: center;
         }
-        video {
+        .video-js {
             width: 100%;
             max-width: 600px;
             height: auto;
@@ -38,42 +39,61 @@
     
     <div class="video-container">
         <h2>Sintel 视频测试</h2>
-        <video id="testVideo" controls>
-            您的浏览器不支持视频播放。
-        </video>
+        <video-js
+            id="testVideo"
+            class="video-js vjs-default-skin"
+            controls
+            preload="auto"
+            width="600"
+            height="300"
+            data-setup="{}">
+        </video-js>
         <div id="status" class="status">正在加载视频...</div>
     </div>
     
     <div class="video-container">
         <h2>Big Buck Bunny 视频测试</h2>
-        <video id="testVideo2" controls>
-            您的浏览器不支持视频播放。
-        </video>
+        <video-js
+            id="testVideo2"
+            class="video-js vjs-default-skin"
+            controls
+            preload="auto"
+            width="600"
+            height="300"
+            data-setup="{}">
+        </video-js>
         <div id="status2" class="status">正在加载视频...</div>
     </div>
 
+    <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
     <script>
         // 测试视频URL
         const sintelUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4';
         const bunnyUrl = 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
         
-        // 获取视频元素和状态显示元素
-        const testVideo = document.getElementById('testVideo');
+        // 初始化Video.js播放器
+        const player1 = videojs('testVideo');
+        const player2 = videojs('testVideo2');
+        
+        // 获取状态显示元素
         const status = document.getElementById('status');
-        const testVideo2 = document.getElementById('testVideo2');
         const status2 = document.getElementById('status2');
         
         // 测试播放 Sintel 视频
-        testVideo.src = sintelUrl;
-        testVideo.load();
+        player1.src({
+            src: sintelUrl,
+            type: 'video/mp4'
+        });
         
-        testVideo.addEventListener('loadeddata', function() {
+        player1.on('loadeddata', function() {
             status.textContent = '视频加载成功，可以播放';
             status.className = 'status success';
         });
         
-        testVideo.addEventListener('error', function(e) {
-            status.innerHTML = '视频加载失败，可能的原因：<br>' +
+        player1.on('error', function() {
+            const error = player1.error();
+            status.innerHTML = '视频加载失败，错误代码: ' + error.code + '<br>' +
+                              '可能的原因：<br>' +
                               '1. 浏览器安全策略限制<br>' +
                               '2. 视频服务器不支持跨域请求<br>' +
                               '3. 网络连接问题<br><br>' +
@@ -82,16 +102,20 @@
         });
         
         // 测试播放 Big Buck Bunny 视频
-        testVideo2.src = bunnyUrl;
-        testVideo2.load();
+        player2.src({
+            src: bunnyUrl,
+            type: 'video/mp4'
+        });
         
-        testVideo2.addEventListener('loadeddata', function() {
+        player2.on('loadeddata', function() {
             status2.textContent = '视频加载成功，可以播放';
             status2.className = 'status success';
         });
         
-        testVideo2.addEventListener('error', function(e) {
-            status2.innerHTML = '视频加载失败，可能的原因：<br>' +
+        player2.on('error', function() {
+            const error = player2.error();
+            status2.innerHTML = '视频加载失败，错误代码: ' + error.code + '<br>' +
+                               '可能的原因：<br>' +
                                '1. 浏览器安全策略限制<br>' +
                                '2. 视频服务器不支持跨域请求<br>' +
                                '3. 网络连接问题<br><br>' +
