@@ -3,7 +3,8 @@ let videoFiles = [
     { name: "示例视频 1", url: "videos/sample1.mp4" },
     { name: "示例视频 2", url: "videos/sample2.mp4" },
     { name: "示例视频 3", url: "videos/sample3.mp4" },
-    { name: "示例视频 4", url: "videos/sample4.mp4" }
+    { name: "示例视频 4", url: "videos/sample4.mp4" },
+    { name: "Big Buck Bunny", url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" }
 ];
 
 // VAST广告URL（写死在代码中）
