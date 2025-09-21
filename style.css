@@ -40,6 +40,38 @@ header h1 {
     max-height: 70vh;
 }
 
+.controls {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.url-upload h2 {
+    margin-bottom: 15px;
+    color: #e53935;
+}
+
+.url-upload input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.url-upload button {
+    padding: 10px 20px;
+    background-color: #e53935;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.url-upload button:hover {
+    background-color: #c62828;
+}
 
 .video-list {
     background-color: #fff;
@@ -89,4 +121,8 @@ header h1 {
         grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
     }
     
+    .url-upload input {
+        width: 100% !important;
+        margin-bottom: 10px;
+    }
 }

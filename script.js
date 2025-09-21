@@ -12,6 +12,8 @@ const VAST_AD_URL = ""; // 在这里设置默认的VAST广告URL
 // DOM元素
 const videoPlayer = document.getElementById('videoPlayer');
 const videoList = document.getElementById('videoList');
+const videoUrlInput = document.getElementById('videoUrl');
+const addVideoButton = document.getElementById('addVideo');
 
 // VAST Client
 const VASTClient = window.VAST.VASTClient;
@@ -23,7 +25,59 @@ document.addEventListener('DOMContentLoaded', function() {
     loadVideoList();
     // 尝试动态加载videos文件夹中的视频文件
     loadVideosFromFolder();
+    
+    // 添加通过URL添加视频的功能
+    addVideoButton.addEventListener('click', addVideoFromUrl);
+    
+    // 支持回车键添加视频
+    videoUrlInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            addVideoFromUrl();
+        }
+    });
 });
+
+// 通过URL添加视频
+function addVideoFromUrl() {
+    const url = videoUrlInput.value.trim();
+    
+    if (!url) {
+        alert('请输入有效的视频URL');
+        return;
+    }
+    
+    // 简单验证是否为视频链接
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+    const isVideoUrl = videoExtensions.some(ext => url.toLowerCase().includes(ext));
+    
+    if (!isVideoUrl) {
+        if (!confirm('该URL可能不是视频文件，是否仍要添加？')) {
+            return;
+        }
+    }
+    
+    // 从URL中提取文件名作为视频名称
+    let fileName = url.split('/').pop();
+    if (fileName.includes('?')) {
+        fileName = fileName.split('?')[0];
+    }
+    
+    if (!fileName) {
+        fileName = '未命名视频 ' + (videoFiles.length + 1);
+    }
+    
+    // 添加到视频列表
+    const newVideo = { name: fileName, url: url };
+    videoFiles.push(newVideo);
+    
+    // 更新显示
+    loadVideoList();
+    
+    // 清空输入框
+    videoUrlInput.value = '';
+    
+    alert('视频已添加');
+}
 
 // 尝试动态加载videos文件夹中的视频文件
 function loadVideosFromFolder() {
