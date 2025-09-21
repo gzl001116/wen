@@ -1,10 +1,9 @@
-// 视频文件列表（实际项目中应该从服务器获取）
-const videoFiles = [
+// 默认视频文件列表（如果无法动态获取，则使用此列表）
+let videoFiles = [
     { name: "示例视频 1", url: "videos/sample1.mp4" },
     { name: "示例视频 2", url: "videos/sample2.mp4" },
     { name: "示例视频 3", url: "videos/sample3.mp4" },
-    { name: "示例视频 4", url: "videos/sample4.mp4" },
-    { name: "上传的视频", url: "videos/09599e3a4dce80a4e0b99b0a1055a1ee.mp4" }
+    { name: "示例视频 4", url: "videos/sample4.mp4" }
 ];
 
 // VAST广告URL（写死在代码中）
@@ -22,17 +21,40 @@ const VASTTracker = window.VAST.VASTTracker;
 // 初始化
 document.addEventListener('DOMContentLoaded', function() {
     loadVideoList();
-    // 如果有视频文件，自动加载第一个
-    if (videoFiles.length > 0) {
-        // 如果设置了VAST广告URL，则先播放广告
-        if (VAST_AD_URL) {
-            loadVastAd(VAST_AD_URL, videoFiles[0].url);
-        } else {
-            playVideo(videoFiles[0].url);
-        }
-        setActiveVideo(0);
-    }
+    // 尝试动态加载videos文件夹中的视频文件
+    loadVideosFromFolder();
 });
+
+// 尝试动态加载videos文件夹中的视频文件
+function loadVideosFromFolder() {
+    // 模拟异步加载视频文件
+    setTimeout(() => {
+        // 在实际项目中，这里应该通过服务器API获取视频列表
+        // 这里我们手动添加已上传的视频文件
+        const uploadedVideo = { 
+            name: "上传的视频", 
+            url: "videos/09599e3a4dce80a4e0b99b0a1055a1ee.mp4" 
+        };
+        
+        // 检查是否已经添加过该视频
+        const exists = videoFiles.some(video => video.url === uploadedVideo.url);
+        if (!exists) {
+            videoFiles.push(uploadedVideo);
+            loadVideoList();
+        }
+        
+        // 自动播放第一个视频
+        if (videoFiles.length > 0) {
+            // 如果设置了VAST广告URL，则先播放广告
+            if (VAST_AD_URL) {
+                loadVastAd(VAST_AD_URL, videoFiles[0].url);
+            } else {
+                playVideo(videoFiles[0].url);
+            }
+            setActiveVideo(0);
+        }
+    }, 500);
+}
 
 // 加载视频列表
 function loadVideoList() {
@@ -64,7 +86,7 @@ function playVideo(url) {
         })
         .catch(error => {
             console.error('视频播放出错:', error);
-            alert('无法播放视频，请检查文件路径或格式');
+            alert('无法播放视频，请检查文件路径或格式: ' + error.message);
         });
 }
 
