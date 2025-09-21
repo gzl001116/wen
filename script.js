@@ -37,6 +37,33 @@ document.addEventListener('DOMContentLoaded', function() {
             addVideoFromUrl();
         }
     });
+    
+    // 监听视频播放错误
+    videoPlayer.addEventListener('error', function(e) {
+        const error = videoPlayer.error;
+        let errorMsg = '视频播放出错: ';
+        
+        switch (error.code) {
+            case error.MEDIA_ERR_ABORTED:
+                errorMsg += '您中止了视频播放。';
+                break;
+            case error.MEDIA_ERR_NETWORK:
+                errorMsg += '网络错误导致视频下载中断。';
+                break;
+            case error.MEDIA_ERR_DECODE:
+                errorMsg += '视频解码错误。';
+                break;
+            case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                errorMsg += '视频格式不支持或URL无效。';
+                break;
+            default:
+                errorMsg += '未知错误。';
+                break;
+        }
+        
+        console.error('视频播放错误:', errorMsg);
+        alert(errorMsg + '\n\n提示：如果您尝试播放在线视频，请确保使用本地服务器运行此应用，而不是直接打开HTML文件。');
+    });
 });
 
 // 通过URL添加视频
@@ -142,7 +169,8 @@ function playVideo(url) {
         })
         .catch(error => {
             console.error('视频播放出错:', error);
-            alert('无法播放视频，请检查文件路径或格式: ' + error.message);
+            alert('无法播放视频，请检查文件路径或格式: ' + error.message + 
+                  '\n\n提示：如果您尝试播放在线视频，请确保使用本地服务器运行此应用，而不是直接打开HTML文件。');
         });
 }
 

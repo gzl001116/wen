@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试在线视频播放</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .video-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        video {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <h1>测试在线视频播放</h1>
+    
+    <div class="video-container">
+        <h2>Sintel 视频测试</h2>
+        <video id="testVideo" controls>
+            您的浏览器不支持视频播放。
+        </video>
+        <div id="status" class="status">正在加载视频...</div>
+    </div>
+    
+    <div class="video-container">
+        <h2>Big Buck Bunny 视频测试</h2>
+        <video id="testVideo2" controls>
+            您的浏览器不支持视频播放。
+        </video>
+        <div id="status2" class="status">正在加载视频...</div>
+    </div>
+
+    <script>
+        // 测试视频URL
+        const sintelUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4';
+        const bunnyUrl = 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
+        
+        // 获取视频元素和状态显示元素
+        const testVideo = document.getElementById('testVideo');
+        const status = document.getElementById('status');
+        const testVideo2 = document.getElementById('testVideo2');
+        const status2 = document.getElementById('status2');
+        
+        // 测试播放 Sintel 视频
+        testVideo.src = sintelUrl;
+        testVideo.load();
+        
+        testVideo.addEventListener('loadeddata', function() {
+            status.textContent = '视频加载成功，可以播放';
+            status.className = 'status success';
+        });
+        
+        testVideo.addEventListener('error', function(e) {
+            status.innerHTML = '视频加载失败，可能的原因：<br>' +
+                              '1. 浏览器安全策略限制<br>' +
+                              '2. 视频服务器不支持跨域请求<br>' +
+                              '3. 网络连接问题<br><br>' +
+                              '建议使用本地服务器运行此页面';
+            status.className = 'status error';
+        });
+        
+        // 测试播放 Big Buck Bunny 视频
+        testVideo2.src = bunnyUrl;
+        testVideo2.load();
+        
+        testVideo2.addEventListener('loadeddata', function() {
+            status2.textContent = '视频加载成功，可以播放';
+            status2.className = 'status success';
+        });
+        
+        testVideo2.addEventListener('error', function(e) {
+            status2.innerHTML = '视频加载失败，可能的原因：<br>' +
+                               '1. 浏览器安全策略限制<br>' +
+                               '2. 视频服务器不支持跨域请求<br>' +
+                               '3. 网络连接问题<br><br>' +
+                               '建议使用本地服务器运行此页面';
+            status2.className = 'status error';
+        });
+    </script>
+</body>
+</html>

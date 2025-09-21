@@ -9,13 +9,22 @@
 - 响应式设计，支持移动端
 - 键盘快捷键支持（空格键播放/暂停，左右箭头快进/快退）
 - VAST广告支持（支持VAST 2.0、3.0和4.0，广告URL写死在代码中）
+- 支持通过URL添加在线视频
 
 ## 使用方法
 
 1. 将视频文件放在 `videos` 文件夹中
-2. 修改 `script.js` 中的 [videoFiles](file:///d:/ruanjian/github/wen/script.js#L2-L7) 数组，添加你的视频文件路径
+2. 修改 `script.js` 中的 [videoFiles](file:///d:/ruanjian/github/wen/script.js#L2-L8) 数组，添加你的视频文件路径
 3. （可选）在 `script.js` 中设置 [VAST_AD_URL](file:///d:/ruanjian/github/wen/script.js#L11-L11) 变量以启用VAST广告
 4. 在浏览器中打开 `index.html` 即可使用
+
+## 重要说明：在线视频播放
+
+由于浏览器安全策略限制，直接打开HTML文件可能无法播放在线视频。如果您需要播放在线视频（如示例中的Sintel或Big Buck Bunny），请使用本地服务器运行此应用：
+
+- 使用 VS Code 的 Live Server 插件
+- 使用 Python: `python -m http.server 8000`
+- 使用 Node.js 的 `http-server` 包
 
 ## 支持的视频格式
 
