@@ -3,11 +3,12 @@ const videoFiles = [
     { name: "示例视频 1", url: "videos/sample1.mp4" },
     { name: "示例视频 2", url: "videos/sample2.mp4" },
     { name: "示例视频 3", url: "videos/sample3.mp4" },
-    { name: "示例视频 4", url: "videos/sample4.mp4" }
+    { name: "示例视频 4", url: "videos/sample4.mp4" },
+    { name: "上传的视频", url: "videos/09599e3a4dce80a4e0b99b0a1055a1ee.mp4" }
 ];
 
 // VAST广告URL（写死在代码中）
-const VAST_AD_URL = "https://example.com/vast.xml"; // 在这里设置默认的VAST广告URL
+const VAST_AD_URL = ""; // 在这里设置默认的VAST广告URL
 
 // DOM元素
 const videoPlayer = document.getElementById('videoPlayer');
