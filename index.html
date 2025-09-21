@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频播放器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>视频播放器</h1>
+        </header>
+        
+        <div class="video-container">
+            <video id="videoPlayer" controls>
+                您的浏览器不支持视频播放。
+            </video>
+        </div>
+        
+        <div class="controls">
+            <div class="vast-controls">
+                <h2>VAST 广告设置</h2>
+                <input type="text" id="vastUrl" placeholder="输入 VAST URL" style="width: 70%;">
+                <button id="loadVast">加载广告</button>
+            </div>
+        </div>
+        
+        <div class="video-list">
+            <h2>视频列表</h2>
+            <ul id="videoList">
+                <!-- 视频列表将通过JavaScript动态加载 -->
+            </ul>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/vast-client@3.2.0/dist/vast-client-js.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
